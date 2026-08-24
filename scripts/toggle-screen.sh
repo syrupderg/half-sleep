@@ -53,6 +53,12 @@ if kscreen-doctor -o | grep -q "Virtual-BlackHole"; then
     kscreen-doctor output."$PRIMARY_OUT".enable
     killall krfb-virtualmonitor
     
+    if [ -f /tmp/screen-toggle-bl.txt ]; then
+        saved_bl=$(cat /tmp/screen-toggle-bl.txt)
+        brightnessctl --class=backlight set "$saved_bl"
+        rm -f /tmp/screen-toggle-bl.txt
+    fi
+    
     if [ -f /tmp/screen-toggle-kbd.txt ]; then
         saved_kbd=$(cat /tmp/screen-toggle-kbd.txt)
         (
@@ -67,9 +73,17 @@ if kscreen-doctor -o | grep -q "Virtual-BlackHole"; then
     fi
 
 else
+    current_bl=$(brightnessctl --class=backlight get)
+    if [ ! -f /tmp/screen-toggle-bl.txt ]; then
+        if [ "$current_bl" -gt 0 ]; then
+            echo "$current_bl" > /tmp/screen-toggle-bl.txt
+        fi
+    fi
+
     if [[ "$kbd_arg" == --kbd=* ]] && [[ "$kbd_arg" != "--kbd=none" ]]; then
         pct="${kbd_arg#--kbd=}"
         current_kbd=$(get_kbd)
+        
         # Avoid saving an already-muted brightness if toggled too fast
         if [ ! -f /tmp/screen-toggle-kbd.txt ]; then
             if [ "$current_kbd" -gt 0 ]; then
