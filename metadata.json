@@ -1,0 +1,20 @@
+{
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "syrupderg@proton.me",
+                "Name": "syrupderg"
+            }
+        ],
+        "Category": "System Information",
+        "Description": "Puts the laptop in a half-sleep state by disabling the screen but keeping background apps running",
+        "Icon": "system-suspend",
+        "Id": "dev.syrupderg.half-sleep",
+        "Name": "Half Sleep",
+        "Version": "1.0",
+        "License": "GPL-3.0-or-later",
+        "Website": "https://github.com/syrupderg/half-sleep"
+    },
+    "KPackageStructure": "Plasma/Applet",
+    "X-Plasma-API-Minimum-Version": "6.0"
+}
