@@ -32,8 +32,13 @@ set_prof() {
 kbd_arg="$1"
 vol_arg="$2"
 prof_arg="$3"
+block_arg="$4"
 
 if kscreen-doctor -o | grep -q "Virtual-BlackHole"; then
+    if [ -f /tmp/screen-toggle-inhibit.pid ]; then
+        kill $(cat /tmp/screen-toggle-inhibit.pid) 2>/dev/null
+        rm -f /tmp/screen-toggle-inhibit.pid
+    fi
     if [ -f /tmp/screen-toggle-vol.txt ]; then
         saved_vol=$(cat /tmp/screen-toggle-vol.txt)
         set_vol "$saved_vol"
@@ -113,6 +118,13 @@ else
             echo "$current_prof" > /tmp/screen-toggle-prof.txt
         fi
         set_prof "$target_prof"
+    fi
+
+    if [[ "$block_arg" == "--block-sleep" ]]; then
+        if [ ! -f /tmp/screen-toggle-inhibit.pid ]; then
+            nohup systemd-inhibit --what=sleep:idle --who="Half Sleep" --why="Screen is turned off" sleep infinity >/dev/null 2>&1 &
+            echo $! > /tmp/screen-toggle-inhibit.pid
+        fi
     fi
 
     if ! pidof krfb-virtualmonitor > /dev/null; then
