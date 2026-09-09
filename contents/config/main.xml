@@ -26,5 +26,11 @@
     <entry name="blockSleep" type="Bool">
       <default>false</default>
     </entry>
+    <entry name="disablePointers" type="Bool">
+      <default>false</default>
+    </entry>
+    <entry name="disableKeyboard" type="Bool">
+      <default>false</default>
+    </entry>
   </group>
 </kcfg>

@@ -2,9 +2,27 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import org.kde.kirigami as Kirigami
+import org.kde.plasma.plasma5support as Plasma5Support
 
 Item {
     id: page
+    
+    property bool inInputGroup: true
+
+    Plasma5Support.DataSource {
+        id: executable
+        engine: "executable"
+        connectedSources: []
+        onNewData: function(source, data) {
+            disconnectSource(source)
+            let out = (data["stdout"] || "").trim()
+            page.inInputGroup = (out === "YES")
+        }
+    }
+
+    Component.onCompleted: {
+        executable.connectSource("bash -c 'id -Gn $USER | grep -qw input && echo YES || echo NO'")
+    }
     
     property alias cfg_toggleKbd: toggleKbdCheckbox.checked
     property alias cfg_kbdBrightness: kbdSlider.value
@@ -14,6 +32,11 @@ Item {
     
     property alias cfg_toggleProfile: toggleProfileCheckbox.checked
     property alias cfg_profileTarget: profileSlider.value
+    
+    property alias cfg_blockSleep: blockSleepSwitch.checked
+    
+    property alias cfg_disablePointers: disablePointersSwitch.checked
+    property alias cfg_disableKeyboard: disableKeyboardSwitch.checked
 
     ColumnLayout {
         anchors.centerIn: parent
@@ -137,6 +160,47 @@ Item {
                         return i18n("Performance")
                     }
                 }
+            }
+        }
+        Kirigami.Separator {
+            Layout.fillWidth: true
+        }
+
+        // Sleep Settings
+        ColumnLayout {
+            spacing: Kirigami.Units.smallSpacing
+            
+            Switch {
+                id: blockSleepSwitch
+                text: i18n("Block sleep and screen locking when screen is off")
+            }
+        }
+
+        Kirigami.Separator {
+            Layout.fillWidth: true
+        }
+
+        // Input Settings
+        ColumnLayout {
+            spacing: Kirigami.Units.smallSpacing
+            Layout.fillWidth: true
+            
+            Switch {
+                id: disablePointersSwitch
+                text: i18n("Disable touchpad and mouse when screen is off")
+            }
+
+            Switch {
+                id: disableKeyboardSwitch
+                text: i18n("Disable keyboard when screen is off")
+            }
+
+            Kirigami.InlineMessage {
+                Layout.fillWidth: true
+                Layout.topMargin: Kirigami.Units.smallSpacing
+                visible: !page.inInputGroup
+                type: Kirigami.MessageType.Warning
+                text: i18n("Disabling the keyboard or mouse requires your user account to be in the 'input' group:\nsudo usermod -aG input $USER\n(Log out and back in after running this command)")
             }
         }
     }

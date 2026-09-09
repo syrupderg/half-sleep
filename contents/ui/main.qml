@@ -1,23 +1,24 @@
 import QtQuick
+import QtQuick.Layouts
 import org.kde.plasma.plasmoid
 import org.kde.plasma.core as PlasmaCore
-import org.kde.plasma.components as PlasmaComponents
 import org.kde.plasma.plasma5support as Plasma5Support
+import org.kde.kirigami as Kirigami
 
 PlasmoidItem {
     id: root
     
     property bool hasShortcut: Plasmoid.globalShortcut !== undefined && Plasmoid.globalShortcut.toString() !== ""
 
-    toolTipMainText: i18n("Half Sleep")
-    toolTipSubText: hasShortcut ? i18n("Ready (Shortcut assigned)") : i18n("Action required: Assign a global shortcut!")
+    toolTipMainText: root.hasShortcut ? i18n("Turn Off Screen") : i18n("Safety Lock Active")
+    toolTipSubText: root.hasShortcut ? i18n("Click to turn off the display") : i18n("You must assign a global shortcut to this widget before you can use it.")
 
     Plasma5Support.DataSource {
         id: executable
         engine: "executable"
         connectedSources: []
-        onNewData: function(sourceName, data) {
-            executable.disconnectSource(sourceName)
+        onNewData: function(source, data) {
+            disconnectSource(source)
         }
     }
 
@@ -38,32 +39,42 @@ PlasmoidItem {
         }
         let profArg = "--prof=" + profStr;
         
-        executable.connectSource("bash -c '~/.local/bin/toggle-screen.sh " + kbdArg + " " + volArg + " " + profArg + "; echo " + Date.now() + "'")
+        let blockArg = Plasmoid.configuration.blockSleep ? "--block-sleep" : "--no-block-sleep";
+        let ptrArg = Plasmoid.configuration.disablePointers ? "--disable-pointers" : "--no-disable-pointers";
+        let kbdBlockArg = Plasmoid.configuration.disableKeyboard ? "--disable-keyboard" : "--no-disable-keyboard";
+        
+        executable.connectSource("bash -c '~/.local/bin/toggle-screen.sh " + kbdArg + " " + volArg + " " + profArg + " " + blockArg + " " + ptrArg + " " + kbdBlockArg + "; echo " + Date.now() + "'")
     }
 
     Plasmoid.onActivated: {
-        if (!hasShortcut) return;
         toggleScreen()
     }
 
-    Item {
-        anchors.fill: parent
-        
+    preferredRepresentation: fullRepresentation
+    fullRepresentation: Item {
+        Layout.minimumWidth: Kirigami.Units.iconSizes.smallMedium
+        Layout.minimumHeight: Kirigami.Units.iconSizes.smallMedium
+        Layout.preferredWidth: Kirigami.Units.iconSizes.large
+        Layout.preferredHeight: Kirigami.Units.iconSizes.large
+
         Text {
             anchors.centerIn: parent
-            text: hasShortcut ? "💤" : "❗"
-            font.pixelSize: Math.min(parent.width, parent.height) * 0.8
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
-        }
+            text: root.hasShortcut ? "💤" : "❗"
+            font.pixelSize: Math.min(parent.width, parent.height) * 0.7
+            renderType: Text.NativeRendering
+            opacity: mouseArea.pressed ? 0.7 : 1.0
 
-        MouseArea {
-            anchors.fill: parent
-            onClicked: {
-                if (!hasShortcut) {
-                    executable.connectSource("kdialog --sorry 'Safety Lock: You MUST assign a global shortcut to this widget (Right Click > Configure > Keyboard Shortcuts) before you can use it, otherwise you will not be able to turn your screen back on!'")
-                } else {
-                    toggleScreen()
+            MouseArea {
+                id: mouseArea
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    if (root.hasShortcut) {
+                        toggleScreen()
+                    } else {
+                        executable.connectSource("bash -c 'kdialog --sorry \"Safety Lock Active!\\n\\nYou must right-click the widget and assign a keyboard shortcut to \\\"Activate Widget\\\" first.\\n\\nIf you turned off the screen right now, you would have no way to turn it back on!\"'")
+                    }
                 }
             }
         }
