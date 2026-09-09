@@ -45,13 +45,13 @@ You will need the following standard Linux utilities installed:
    chmod +x ~/.local/bin/toggle-screen.sh ~/.local/bin/half-sleep-grab.py ~/.local/bin/half-sleep-kbd.py
    ```
 
-   > [!IMPORTANT]
-   > **Keyboard & Mouse Disabling Permission:**
-   > If you plan to enable the options to disable keyboard or mouse inputs while the display is off, your user account must have permission to access Linux `/dev/input/event*` devices without root. Add your user to the `input` group:
-   > ```bash
-   > sudo usermod -aG input $USER
-   > ```
-   > After running this command, **log out and log back in** (or reboot) for group changes to take effect. If you skip this, Half Sleep will still work normally to turn your screen off and on, but keyboard and mouse inputs won't be blocked.
+> [!IMPORTANT]
+> **Keyboard & Mouse Disabling Permission:**
+> If you plan to enable the options to disable keyboard or mouse inputs while the display is off, your user account must have permission to access Linux `/dev/input/event*` devices without root. Add your user to the `input` group:
+> ```bash
+> sudo usermod -aG input $USER
+> ```
+> After running this command, **log out and log back in** (or reboot) for group changes to take effect. If you skip this, Half Sleep will still work normally to turn your screen off and on, but keyboard and mouse inputs won't be blocked.
 
 3. **Restart Plasma:** <br>
    Restart your desktop shell so KDE recognizes the new widget:
@@ -62,5 +62,5 @@ You will need the following standard Linux utilities installed:
 4. **Add to Panel & Assign Shortcut:** <br>
    Right-click your KDE panel, select **Add Widgets**, search for **"Half Sleep"**, and add it.
 
-  > [!CAUTION]
-  > You must assign a global shortcut to the widget before it will let you turn off the screen.
+> [!CAUTION]
+> You must assign a global shortcut to the widget before it will let you turn off the screen.
